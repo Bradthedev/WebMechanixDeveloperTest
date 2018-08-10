@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <title>Untitled Document</title>
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.js.map"></script>
+  <script>
+    var phonePattern = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+    var tableArr = [];
+    
+    function PhoneBook(name,phone,favorite){
+      this.Name=name;
+      this.PhoneNumber=phone;
+      this.Favorite=favorite;    
+    }
+    
+    function buildTable(){
+      $("#phoneBook tbody").empty();
+      $.each(tableArr, function(index, value){
+        var $row = $("#phoneBook tbody").append(`<tr>
+          <td scope="row">${value.Name}</td>
+          <td>${value.PhoneNumber}</td>
+          <td data-array-index="${index}"><a class="del-btn">Delete</td>
+        </tr>`)
+        $row.find("td:last").click(function(){
+          var arrayIndex = $(this).data("arrayIndex");
+          tableArr.splice(arrayIndex, 1);
+          localStorage.setItem("WebMechDemo",JSON.stringify(tableArr));
+          buildTable();
+        });
+      });
+    }
+    
+    $( document ).ready(function() {
+      debugger;
+      tableArr = JSON.parse(localStorage.getItem('WebMechDemo'));
+      buildTable();
+      $("#addBtn").click(function(e){
+        var name = $("#nameTxt").val();
+        var phoneNumber = $("#phoneNumberTxt").val();
+        debugger;
+        if(name && phoneNumber){
+          if(phoneNumber.match(phonePattern)){
+            tableArr.push(new PhoneBook(name,phoneNumber,false));
+            localStorage.setItem("WebMechDemo",JSON.stringify(tableArr));
+            buildTable();
+          } else {
+            alert("Please Enter a vaild Phone Number")
+          }
+        } else {
+          alert("Please enter all fields");
+        }
+      });
+    });
+  </script>
+  </head>
+
+  <body>
+  <style>
+    
+  </style>
+  <div class="container">
+    <h1>My Phone Book</h1>
+    <form>
+      <div class="row">
+        <div class="col">
+          <input type="text" id="nameTxt" class="form-control" placeholder="Name">
+        </div>
+        <div class="col">
+          <input type="tel" id="phoneNumberTxt" class="form-control" placeholder="Phone Number">
+        </div>
+        <a href="#" id="addBtn" class="btn btn-primary">+ Add</a>
+      </div>
+    </form>
+    <table id="phoneBook" class="table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Phone Number</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
