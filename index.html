@@ -8,25 +8,48 @@
   <script src="js/bootstrap.js.map"></script>
   <script>
     var phonePattern = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
-    var tableArr = [];
+    var tableArr;
     
     function PhoneBook(name,phone,favorite){
       this.Name=name;
       this.PhoneNumber=phone;
       this.Favorite=favorite;    
     }
-    
+     
     function buildTable(){
       $("#phoneBook tbody").empty();
       $.each(tableArr, function(index, value){
+        
+        var favoriteClass = "";
+        
+        if(value.Favorite)
+          favoriteClass = "fav-active";
+        else 
+          favoriteClass = "fav-inactive";
+        
         var $row = $("#phoneBook tbody").append(`<tr>
           <td scope="row">${value.Name}</td>
           <td>${value.PhoneNumber}</td>
+          <td data-array-index="${index}" class="${favoriteClass}"><a class="favorite-col">Favorite</a></td>
           <td data-array-index="${index}"><a class="del-btn">Delete</td>
         </tr>`)
-        $row.find("td:last").click(function(){
+        //Add class for favorite active/inactive
+        
+        //on click events for favorite, and delete
+        $row.find("td:last").unbind('click').bind('click', function(){
           var arrayIndex = $(this).data("arrayIndex");
           tableArr.splice(arrayIndex, 1);
+          localStorage.setItem("WebMechDemo",JSON.stringify(tableArr));
+          buildTable();
+        });
+        $row.find(".favorite-col").unbind('click').bind('click', function(){
+          debugger;
+          var arrayIndex = $(this).closest("td").data("arrayIndex");
+          if(tableArr[arrayIndex].Favorite){
+            tableArr[arrayIndex].Favorite = false;
+          } else {
+            tableArr[arrayIndex].Favorite = true;
+          }
           localStorage.setItem("WebMechDemo",JSON.stringify(tableArr));
           buildTable();
         });
@@ -34,13 +57,18 @@
     }
     
     $( document ).ready(function() {
-      debugger;
-      tableArr = JSON.parse(localStorage.getItem('WebMechDemo'));
+      var parsedArr = JSON.parse(localStorage.getItem('WebMechDemo'));
+      
+      if(parsedArr){
+        tableArr = parsedArr;
+      } else {
+        tableArr = [];
+      }
+      
       buildTable();
       $("#addBtn").click(function(e){
         var name = $("#nameTxt").val();
         var phoneNumber = $("#phoneNumberTxt").val();
-        debugger;
         if(name && phoneNumber){
           if(phoneNumber.match(phonePattern)){
             tableArr.push(new PhoneBook(name,phoneNumber,false));
@@ -59,7 +87,12 @@
 
   <body>
   <style>
-    
+    .fav-active{
+      color:green;
+    }
+    .fav-inactive{
+      color:black;
+    }
   </style>
   <div class="container">
     <h1>My Phone Book</h1>
